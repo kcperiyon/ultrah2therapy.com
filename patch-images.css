@@ -1,0 +1,27 @@
+/* Remove white background from product images */
+.hero-image img,
+.luxury-image img,
+.product-image img,
+img[src*="product"],
+img[src*="ULTRA-H2-HD"],
+img[src*="9p8s0Ake"],
+img[src*="eND4QJuL"] {
+  mix-blend-mode: multiply;
+  background: transparent !important;
+  filter: drop-shadow(0 20px 60px rgba(16,185,129,0.25));
+  border-radius: 20px;
+}
+
+/* Remove any white card/box around the image */
+.hero-image,
+.hero-visual,
+.luxury-image,
+.product-showcase,
+.product-image,
+[class*="hero"] img,
+[class*="product"] img {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  mix-blend-mode: multiply;
+}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UltraH2 Affiliate Portal</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;background:#f8fafc;min-height:100vh;color:#1e293b}
+.container{max-width:900px;margin:0 auto;padding:24px 16px}
+.header{text-align:center;padding:28px 0;background:linear-gradient(135deg,#065f46,#047857);color:white;border-radius:16px;margin-bottom:24px}
+.header h1{font-size:1.4rem;margin-bottom:4px}
+.header p{opacity:0.8;font-size:0.85rem}
+.login-card{background:white;border-radius:12px;padding:32px;box-shadow:0 2px 10px rgba(0,0,0,0.06);max-width:400px;margin:0 auto;text-align:center}
+.login-card h2{font-size:1.1rem;color:#065f46;margin-bottom:16px}
+.login-card input{width:100%;padding:13px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.95rem;margin-bottom:10px;outline:none}
+.login-card input:focus{border-color:#059669}
+.login-card button{width:100%;padding:14px;background:#059669;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer}
+.login-card .error{color:#dc2626;font-size:0.85rem;margin-top:8px;display:none}
+.login-card .reg-link{margin-top:16px;font-size:0.85rem;color:#64748b}
+.login-card .reg-link a{color:#059669;text-decoration:none;font-weight:500}
+.dashboard{display:none}
+.welcome{background:white;padding:16px 20px;border-radius:10px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.welcome h3{font-size:1rem;color:#065f46}
+.welcome .logout-btn{padding:8px 14px;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;font-size:0.8rem;cursor:pointer}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:white;padding:16px;border-radius:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.stat .val{font-size:1.4rem;font-weight:700;color:#065f46}
+.stat .lbl{font-size:0.65rem;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px}
+.card{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:14px}
+.card h3{font-size:0.95rem;color:#065f46;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
+.link-box{background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:8px;padding:12px;font-family:monospace;font-size:0.8rem;word-break:break-all;margin:6px 0;cursor:pointer;transition:0.2s}
+.link-box:hover{background:#dcfce7}
+.copy-btn{padding:7px 14px;background:#065f46;color:white;border:none;border-radius:6px;font-size:0.75rem;cursor:pointer;margin:4px 4px 4px 0}
+table{width:100%;border-collapse:collapse;font-size:0.8rem}
+th{text-align:left;font-size:0.65rem;color:#64748b;text-transform:uppercase;padding:8px 6px;border-bottom:2px solid #f1f5f9}
+td{padding:8px 6px;border-bottom:1px solid #f8fafc}
+.badge{font-size:0.6rem;padding:3px 7px;border-radius:10px;font-weight:600}
+.badge-pending{background:#fef3c7;color:#d97706}
+.badge-confirmed{background:#dbeafe;color:#2563eb}
+.badge-paid{background:#dcfce7;color:#16a34a}
+.badge-cancelled{background:#fee2e2;color:#dc2626}
+.empty{text-align:center;color:#94a3b8;padding:20px;font-size:0.85rem}
+.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:0.8rem;color:#1e40af;margin-top:12px;line-height:1.6}
+@media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr}.container{padding:16px 12px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header"><h1>Affiliate Portal</h1><p>Track your performance & earnings</p></div>
+
+<div id="loginSection">
+<div class="login-card">
+<h2>Login to Your Portal</h2>
+<input type="tel" id="portalPhone" placeholder="WhatsApp number" onkeypress="if(event.key==='Enter')document.getElementById('portalPass').focus()">
+<input type="password" id="portalPass" placeholder="Your password" onkeypress="if(event.key==='Enter')portalLogin()">
+<button onclick="portalLogin()">Login</button>
+<div class="error" id="portalError"></div>
+<div class="reg-link">Don't have an account? <a href="/affiliate">Register here</a></div>
+</div>
+</div>
+
+<div class="dashboard" id="dashSection">
+<div class="welcome"><h3 id="welName">Welcome!</h3><button class="logout-btn" onclick="portalLogout()">Logout</button></div>
+
+<div class="stats-grid">
+<div class="stat"><div class="val" id="pClicks">0</div><div class="lbl">Clicks</div></div>
+<div class="stat"><div class="val" id="pReferrals">0</div><div class="lbl">Sales</div></div>
+<div class="stat"><div class="val" id="pConversion">0%</div><div class="lbl">Conversion</div></div>
+<div class="stat"><div class="val" id="pEarnings">₦0</div><div class="lbl">Earned</div></div>
+<div class="stat"><div class="val" id="pPending">₦0</div><div class="lbl">Pending</div></div>
+<div class="stat"><div class="val" id="pPaid">₦0</div><div class="lbl">Paid</div></div>
+</div>
+
+<div class="card">
+<h3>Your Links</h3>
+<p style="font-size:0.8rem;color:#475569;margin-bottom:4px"><strong>Website link</strong> (share to track visitors):</p>
+<div class="link-box" id="pLink" onclick="copyEl('pLink')"></div>
+<p style="font-size:0.8rem;color:#475569;margin:8px 0 4px"><strong>Checkout link</strong> (direct to purchase page):</p>
+<div class="link-box" id="pPayLink" onclick="copyEl('pPayLink')"></div>
+<button class="copy-btn" onclick="copyEl('pLink')">📋 Copy Website Link</button>
+<button class="copy-btn" onclick="copyEl('pPayLink')">📋 Copy Checkout Link</button>
+<div class="info-box">🕐 Cookie lasts <strong>30 days</strong>. When someone clicks your link, any purchase within 30 days is credited to you — even if they don't buy immediately. You also earn ₦100,000 if YOU buy through your own link (self-purchase).</div>
+</div>
+
+<div class="card">
+<h3>Referral History</h3>
+<div id="refTable"></div>
+</div>
+
+<div class="card">
+<h3>Payout History</h3>
+<div id="payoutTable"></div>
+</div>
+
+<div class="card">
+<h3>30-Day Summary</h3>
+<div class="stats-grid" style="margin:0">
+<div class="stat"><div class="val" id="p30Clicks">0</div><div class="lbl">Clicks</div></div>
+<div class="stat"><div class="val" id="p30Pending">0</div><div class="lbl">Pending</div></div>
+<div class="stat"><div class="val" id="p30Confirmed">0</div><div class="lbl">Confirmed</div></div>
+<div class="stat"><div class="val" id="p30Paid">0</div><div class="lbl">Paid</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+function money(n){return '₦'+Number(n||0).toLocaleString()}
+function copyEl(id){navigator.clipboard.writeText(document.getElementById(id).textContent);document.getElementById(id).style.background='#dcfce7';setTimeout(()=>document.getElementById(id).style.background='#f0fdf4',800)}
+
+async function portalLogin(){
+  const phone=document.getElementById('portalPhone').value.trim();
+  const password=document.getElementById('portalPass').value;
+  const err=document.getElementById('portalError');
+  if(!phone||!password){err.textContent='Enter phone and password';err.style.display='block';return}
+  err.style.display='none';
+  try{
+    const r=await fetch('/api/affiliate/portal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,password})});
+    const d=await r.json();
+    if(r.ok){
+      document.getElementById('loginSection').style.display='none';
+      document.getElementById('dashSection').style.display='block';
+      renderDash(d);
+      sessionStorage.setItem('affAuth',JSON.stringify({phone,password}));
+    }else{err.textContent=d.error||'Login failed';err.style.display='block'}
+  }catch(e){err.textContent='Network error';err.style.display='block'}
+}
+
+function renderDash(d){
+  const a=d.affiliate,s=d.stats;
+  document.getElementById('welName').textContent='Welcome, '+a.name+'!';
+  document.getElementById('pClicks').textContent=s.totalClicks;
+  document.getElementById('pReferrals').textContent=s.totalReferrals;
+  document.getElementById('pConversion').textContent=s.conversionRate;
+  document.getElementById('pEarnings').textContent=money(a.totalEarnings);
+  document.getElementById('pPending').textContent=money(a.pendingPayout);
+  document.getElementById('pPaid').textContent=money(a.totalPaid);
+  document.getElementById('pLink').textContent=a.link;
+  document.getElementById('pPayLink').textContent=a.paymentLink;
+  document.getElementById('p30Clicks').textContent=s.last30DaysClicks;
+  document.getElementById('p30Pending').textContent=s.pendingReferrals;
+  document.getElementById('p30Confirmed').textContent=s.confirmedReferrals;
+  document.getElementById('p30Paid').textContent=s.paidReferrals;
+
+  if(d.referrals.length){
+    document.getElementById('refTable').innerHTML='<table><thead><tr><th>Customer</th><th>Commission</th><th>Status</th><th>Type</th><th>Date</th></tr></thead><tbody>'+d.referrals.map(r=>`<tr><td>${r.customerName}</td><td>${money(r.commission)}</td><td><span class="badge badge-${r.status}">${r.status}</span></td><td>${r.isSelfPurchase?'Self':'Referral'}</td><td>${new Date(r.createdAt).toLocaleDateString()}</td></tr>`).join('')+'</tbody></table>';
+  }else{document.getElementById('refTable').innerHTML='<div class="empty">No sales yet. Share your link!</div>'}
+
+  if(d.payouts&&d.payouts.length){
+    document.getElementById('payoutTable').innerHTML='<table><thead><tr><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th></tr></thead><tbody>'+d.payouts.map(p=>`<tr><td>${money(p.amount)}</td><td>${p.method}</td><td>${p.reference||'—'}</td><td>${new Date(p.date).toLocaleDateString()}</td></tr>`).join('')+'</tbody></table>';
+  }else{document.getElementById('payoutTable').innerHTML='<div class="empty">No payouts yet</div>'}
+}
+
+function portalLogout(){sessionStorage.removeItem('affAuth');document.getElementById('loginSection').style.display='block';document.getElementById('dashSection').style.display='none'}
+
+window.onload=()=>{const s=sessionStorage.getItem('affAuth');if(s){const{phone,password}=JSON.parse(s);document.getElementById('portalPhone').value=phone;document.getElementById('portalPass').value=password;portalLogin()}}
+</script>
+</body>
+</html>

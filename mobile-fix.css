@@ -1,0 +1,333 @@
+/* ===== MOBILE RESPONSIVE FIXES ===== */
+
+/* NAVBAR MOBILE */
+@media (max-width: 768px) {
+  .navbar-inner {
+    padding: 0 16px;
+  }
+  
+  .navbar-logo-text {
+    font-size: 1.2rem;
+  }
+  
+  .navbar-logo-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  /* Hide desktop reserve button on mobile */
+  .navbar-inner > div[style*="display:flex"] {
+    display: none !important;
+  }
+  
+  /* Show mobile toggle */
+  .mobile-toggle {
+    display: flex !important;
+    z-index: 1001;
+  }
+  
+  /* Mobile menu overlay */
+  .navbar-links {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    z-index: 1000;
+    padding: 80px 24px;
+  }
+  
+  .navbar-links.active {
+    display: flex !important;
+  }
+  
+  .navbar-links a {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a2e23;
+  }
+}
+
+/* HERO MOBILE */
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 100px 0 60px;
+  }
+  
+  .hero-content {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+    text-align: center;
+  }
+  
+  .hero-headline {
+    font-size: 2.2rem !important;
+    line-height: 1.2;
+  }
+  
+  .hero-subheadline {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  
+  .hero-badge {
+    font-size: 0.7rem;
+    padding: 8px 16px;
+  }
+  
+  .hero-ctas {
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .hero-ctas .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 16px 24px;
+  }
+  
+  .hero-trust {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 24px;
+  }
+  
+  .hero-visual {
+  }
+  
+  .hero-product {
+    max-width: 260px !important;
+    margin: 0 auto;
+  }
+  
+  .hero-product img {
+    max-width: 220px !important;
+  }
+  
+  .hero-product-glow {
+    width: 250px !important;
+    height: 250px !important;
+  }
+  
+  .hero-product-ring {
+    width: 220px !important;
+    height: 220px !important;
+  }
+}
+
+/* SECTIONS MOBILE */
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 0 !important;
+  }
+  
+  .section-title {
+    font-size: 1.7rem !important;
+    line-height: 1.3;
+  }
+  
+  .section-subtitle {
+    font-size: 0.95rem;
+  }
+  
+  .pain-header {
+    margin-bottom: 40px !important;
+  }
+}
+
+/* PAIN CARDS MOBILE */
+@media (max-width: 768px) {
+  .pain-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  
+  .pain-card {
+    padding: 24px;
+  }
+}
+
+/* DISCOVERY MOBILE */
+@media (max-width: 768px) {
+  .discovery-content {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  
+  .discovery-img {
+    max-width: 100% !important;
+    border-radius: 16px;
+  }
+}
+
+/* BENEFITS MOBILE */
+@media (max-width: 768px) {
+  .benefits-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  
+  .benefit-card {
+    padding: 28px 24px;
+  }
+}
+
+/* SCIENCE HEALTH SECTION MOBILE */
+@media (max-width: 768px) {
+  .science-health-section .container > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  /* Stats bar mobile */
+  .science-health-section div[style*="grid-template-columns:repeat(auto-fit,minmax(200px"] {
+    grid-template-columns: 1fr 1fr !important;
+    padding: 32px 20px !important;
+    gap: 20px !important;
+  }
+}
+
+/* LUXURY SECTION MOBILE */
+@media (max-width: 768px) {
+  .luxury-content {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  
+  .luxury-price .amount {
+    font-size: 2rem;
+  }
+  
+  .luxury-product-frame {
+    padding: 30px;
+  }
+}
+
+/* TESTIMONIALS MOBILE */
+@media (max-width: 768px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  
+  .testimonial-card {
+    padding: 24px;
+  }
+}
+
+/* AFFILIATE MOBILE */
+@media (max-width: 768px) {
+  .affiliate-steps {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  
+  .affiliate-earn {
+    font-size: 2.5rem !important;
+  }
+}
+
+/* CONSULTATION MOBILE */
+@media (max-width: 768px) {
+  .consultation-content {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  
+  .consultation-form {
+    padding: 28px 20px;
+  }
+}
+
+/* FAQ MOBILE */
+@media (max-width: 768px) {
+  .faq-question {
+    font-size: 0.95rem;
+  }
+}
+
+/* FINAL CTA MOBILE */
+@media (max-width: 768px) {
+  .final-cta h2 {
+    font-size: 1.8rem !important;
+  }
+  
+  .final-cta-buttons {
+    flex-direction: column !important;
+    align-items: stretch;
+  }
+}
+
+/* FOOTER MOBILE */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+/* WHATSAPP BUTTON MOBILE */
+@media (max-width: 768px) {
+  .whatsapp-float {
+    bottom: 20px;
+    right: 20px;
+    width: 54px;
+    height: 54px;
+  }
+  
+  .whatsapp-float svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* MODAL MOBILE */
+@media (max-width: 768px) {
+  .modal {
+    padding: 32px 20px;
+    margin: 16px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* URGENCY BANNER MOBILE */
+@media (max-width: 768px) {
+  .urgency-banner {
+    font-size: 0.75rem;
+    padding: 10px 16px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 380px) {
+  .hero-headline {
+    font-size: 1.8rem !important;
+  }
+  
+  .container {
+    padding: 0 12px;
+  }
+  
+  .btn {
+    padding: 12px 20px;
+    font-size: 0.85rem;
+  }
+}
+

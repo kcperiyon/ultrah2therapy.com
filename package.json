@@ -1,0 +1,16 @@
+{
+  "name": "ultrah2-website",
+  "version": "2.0.0",
+  "description": "UltraH2 Therapy Website with Ada AI Assistant",
+  "main": "server.js",
+  "scripts": {
+    "start": "node -r dotenv/config server.js",
+    "dev": "node -r dotenv/config server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "nodemailer": "^8.0.9"
+  }
+}

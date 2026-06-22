@@ -1,0 +1,18 @@
+# deps
+node_modules/
+
+# secrets
+.env
+.env.save
+
+# runtime data (contains customer PII - do not commit to public repo)
+affiliates.json
+contacts.json
+referrals.json
+affiliate-clicks.json
+affiliate-payouts.json
+leads.json
+
+# logs / os
+*.log
+.DS_Store
