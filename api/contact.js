@@ -1,5 +1,5 @@
 const express = require('express');
-const { transporter, FROM, TO } = require('./mailer');
+const { transporter, sendMail, FROM, TO } = require('./mailer');
 const router = express.Router();
 
 // Configure email transporter
@@ -66,7 +66,7 @@ router.post('/submit', async (req, res) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     contact.emailSent = true;
   } catch (err) {
     console.error('Email send error:', err.message);
