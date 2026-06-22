@@ -106,6 +106,42 @@ router.post('/click', (req, res) => {
   res.json({ success: true });
 });
 
+// PUBLIC: Record a pending referral (from website checkout, before Paystack redirect)
+router.post('/referral', (req, res) => {
+  const { affiliateCode, customerName, customerPhone, customerEmail, amount } = req.body;
+  if (!affiliateCode) return res.json({ error: 'Affiliate code required' });
+
+  const affiliates = readJSON(AFFILIATES_FILE);
+  const aff = affiliates.find(a => a.code === affiliateCode);
+  if (!aff) return res.json({ error: 'Invalid affiliate code' });
+
+  const referrals = readJSON(REFERRALS_FILE);
+  // De-dupe: same affiliate + customer phone within 24h => return existing pending referral
+  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const dup = referrals.find(r => r.affiliateCode === affiliateCode && r.customerPhone === (customerPhone || '') && r.status === 'pending' && new Date(r.createdAt).getTime() > dayAgo);
+  if (dup) return res.json({ success: true, referral: dup, duplicate: true });
+
+  const referral = {
+    id: String(Date.now()),
+    affiliateId: aff.id,
+    affiliateCode: aff.code,
+    affiliateName: aff.name,
+    customerName: customerName || '',
+    customerPhone: customerPhone || '',
+    customerEmail: customerEmail || '',
+    amount: amount || 1300000,
+    commission: COMMISSION,
+    paymentMethod: 'paystack',
+    reference: '',
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+  referrals.push(referral);
+  writeJSON(REFERRALS_FILE, referrals);
+
+  res.json({ success: true, referral });
+});
+
 // PUBLIC: Verify code
 router.get('/verify/:code', (req, res) => {
   const affiliates = readJSON(AFFILIATES_FILE);
