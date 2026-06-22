@@ -1,15 +1,9 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
+const { transporter, FROM, TO } = require('./mailer');
 const router = express.Router();
 
 // Configure email transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'kcperiyon@gmail.com',
-    pass: process.env.EMAIL_PASS || '' // App password needed
-  }
-});
+// Mail transport (Brevo SMTP) provided by ./mailer
 
 // Fallback: save to file if email fails
 const fs = require('fs');
@@ -46,8 +40,9 @@ router.post('/submit', async (req, res) => {
   // Try to send email
   try {
     const mailOptions = {
-      from: `"UltraH2 Website" <${process.env.EMAIL_USER || 'noreply@ultrah2therapy.com'}>`,
-      to: 'kcperiyon@gmail.com',
+      from: `"UltraH2 Website" <${FROM}>`,
+      to: TO,
+      replyTo: email || undefined,
       subject: `🔔 New ${type || 'Contact'} Inquiry — ${name}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e2e8f0;border-radius:12px;">

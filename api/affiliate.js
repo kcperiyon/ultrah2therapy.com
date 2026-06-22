@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { sendMail } = require('./mailer');
 
 const AFFILIATES_FILE = path.join(__dirname, '..', 'affiliates.json');
 const REFERRALS_FILE = path.join(__dirname, '..', 'referrals.json');
@@ -46,6 +47,21 @@ router.post('/register', (req, res) => {
 
   affiliates.push(affiliate);
   writeJSON(AFFILIATES_FILE, affiliates);
+
+  // Notify admin + welcome the new affiliate (non-blocking)
+  sendMail({
+    subject: `New Affiliate Signup - ${affiliate.name}`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;"><h2 style="color:#065f46;">New Affiliate Registered</h2><p><strong>Name:</strong> ${affiliate.name}<br><strong>Phone:</strong> ${affiliate.phone}<br><strong>Email:</strong> ${affiliate.email || "-"}<br><strong>Code:</strong> ${affiliate.code}<br><strong>Bank:</strong> ${affiliate.bankName || "-"} ${affiliate.accountNumber || ""} ${affiliate.accountName || ""}<br><strong>Link:</strong> ${affiliate.link}</p></div>`
+  }).catch(e => console.error("Affiliate admin mail error:", e.message));
+
+  if (affiliate.email) {
+    sendMail({
+      to: affiliate.email,
+      subject: "Welcome to the UltraH2 Affiliate Program",
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;"><div style="background:linear-gradient(135deg,#059669,#047857);padding:24px;border-radius:8px;color:#fff;text-align:center;"><h2 style="margin:0;">Welcome, ${affiliate.name}!</h2><p style="margin:8px 0 0;">You are now an UltraH2 Affiliate Partner</p></div><div style="padding:24px 4px;color:#1e293b;"><p>You earn <strong>N100,000</strong> for every confirmed sale through your link.</p><p><strong>Your referral link:</strong><br><a href="${affiliate.link}">${affiliate.link}</a></p><p><strong>Direct checkout link:</strong><br><a href="${affiliate.paymentLink}">${affiliate.paymentLink}</a></p><p>Track your clicks, referrals and earnings anytime in your <a href="https://ultrah2therapy.com/affiliate-portal">Affiliate Portal</a> (log in with your phone number and password).</p><p style="color:#64748b;font-size:0.85rem;">Share your link on WhatsApp, social media, or in person. Questions? Just reply to this email.</p></div></div>`
+    }).catch(e => console.error("Affiliate welcome mail error:", e.message));
+  }
+
   res.json({ success: true, affiliate });
 });
 
