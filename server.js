@@ -9,6 +9,30 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
+// ---- Admin authentication ----
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+function requireAdmin(req, res, next) {
+  if (ADMIN_TOKEN && req.headers['x-admin-token'] === ADMIN_TOKEN) return next();
+  return res.status(401).json({ error: 'Unauthorized' });
+}
+// Exchange the admin password for the session token
+app.post('/api/admin/login', (req, res) => {
+  if (ADMIN_PASSWORD && (req.body.password || '') === ADMIN_PASSWORD) {
+    return res.json({ token: ADMIN_TOKEN });
+  }
+  return res.status(401).json({ error: 'Invalid password' });
+});
+// Protect sensitive endpoints (affiliate data, contact PII, Ada logs/training, settings writes)
+app.use([
+  '/api/affiliate/admin',
+  '/api/contact/all',
+  '/api/contact/status',
+  '/api/ada/chats',
+  '/api/ada/training',
+  '/api/settings/admin'
+], requireAdmin);
+
 // API Routes
 app.use('/api/ada', require('./api/ada'));
 app.use('/api/ada/training', require('./api/training'));

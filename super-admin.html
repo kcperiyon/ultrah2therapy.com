@@ -276,20 +276,55 @@ tr:hover{background:#f8fafc}
 </div>
 
 <script>
-const PASS = 'H#X@an0d#2960';
 const API = '';
+let ADMIN_TOKEN = '';
 
-function doLogin(){
+// Attach the admin token to every API request from this page
+const _fetch = window.fetch.bind(window);
+window.fetch = function(url, opts){
+  opts = opts || {};
+  if(ADMIN_TOKEN && typeof url === 'string' && url.indexOf('/api/') !== -1){
+    opts.headers = Object.assign({}, opts.headers, { 'x-admin-token': ADMIN_TOKEN });
+  }
+  return _fetch(url, opts);
+};
+
+function showPanel(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('adminPanel').style.display='block';
+  loadDashboard();
+}
+
+async function doLogin(){
   const p = document.getElementById('loginPass').value;
-  if(p === PASS){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('adminPanel').style.display='block';
-    loadDashboard();
-  } else {
+  document.getElementById('loginError').style.display='none';
+  try{
+    const r = await _fetch('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:p})});
+    if(r.ok){
+      const d = await r.json();
+      ADMIN_TOKEN = d.token;
+      try{ sessionStorage.setItem('uh2_admin_token', d.token); }catch(e){}
+      showPanel();
+    } else {
+      document.getElementById('loginError').style.display='block';
+    }
+  }catch(e){
     document.getElementById('loginError').style.display='block';
   }
 }
-function logout(){document.getElementById('loginScreen').style.display='flex';document.getElementById('adminPanel').style.display='none';}
+function logout(){
+  ADMIN_TOKEN='';
+  try{ sessionStorage.removeItem('uh2_admin_token'); }catch(e){}
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('adminPanel').style.display='none';
+}
+// Stay logged in across refreshes within the same tab session
+(function(){
+  try{
+    const t = sessionStorage.getItem('uh2_admin_token');
+    if(t){ ADMIN_TOKEN = t; window.addEventListener('DOMContentLoaded', showPanel); }
+  }catch(e){}
+})();
 
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
