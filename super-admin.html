@@ -264,6 +264,24 @@ tr:hover{background:#f8fafc}
   </div>
 </div>
 
+<!-- EDIT AFFILIATE MODAL -->
+<div class="modal-overlay" id="editAffiliateModal">
+  <div class="modal">
+    <h2>Edit Affiliate</h2>
+    <input type="hidden" id="editAffId">
+    <div class="form-group"><label>Full Name</label><input type="text" id="editAffName"></div>
+    <div class="form-group"><label>Phone</label><input type="text" id="editAffPhone"></div>
+    <div class="form-group"><label>Email</label><input type="text" id="editAffEmail"></div>
+    <div class="form-group"><label>Bank Name</label><input type="text" id="editAffBank"></div>
+    <div class="form-group"><label>Account Number</label><input type="text" id="editAffAccNum"></div>
+    <div class="form-group"><label>Account Name</label><input type="text" id="editAffAccName"></div>
+    <div class="form-group"><label>Status</label><select id="editAffStatus"><option value="active">active</option><option value="suspended">suspended</option></select></div>
+    <div class="form-group"><label>New Password <small style="color:#64748b">(leave blank to keep current)</small></label><input type="text" id="editAffPass" placeholder="Set a new portal password"></div>
+    <button class="btn btn-primary" onclick="saveEditAffiliate()">Save Changes</button>
+    <button class="btn btn-danger" onclick="closeModal('editAffiliateModal')">Cancel</button>
+  </div>
+</div>
+
 <!-- ADD QA MODAL -->
 <div class="modal-overlay" id="addQAModal">
   <div class="modal">
@@ -395,6 +413,7 @@ async function loadAffiliates(){
       <button class="btn" onclick="waAffiliate('${a.id}')" title="Send their link via WhatsApp">WhatsApp</button>
       <button class="btn" onclick="copyAffLink('${a.id}')" title="Copy referral link">Copy Link</button>
       <button class="btn" onclick="resendEmail('${a.code}')" title="Email their link (needs Brevo active)">Email</button>
+      <button class="btn" onclick="openEditAffiliate('${a.id}')" title="Edit details / reset password">Edit</button>
       <button class="btn btn-danger" onclick="deleteAffiliate('${a.id}')">Delete</button>
     </td>
   </tr>`).join('');
@@ -421,6 +440,39 @@ async function deleteAffiliate(id){
   if(!confirm('Delete this affiliate?'))return;
   await fetch('/api/affiliate/admin/delete/'+id,{method:'DELETE'});
   toast('Deleted');loadAffiliates();
+}
+
+// --- Edit affiliate ---
+function openEditAffiliate(id){
+  const a=affById(id);if(!a){toast('Affiliate not found','error');return;}
+  document.getElementById('editAffId').value=a.id;
+  document.getElementById('editAffName').value=a.name||'';
+  document.getElementById('editAffPhone').value=a.phone||'';
+  document.getElementById('editAffEmail').value=a.email||'';
+  document.getElementById('editAffBank').value=a.bankName||'';
+  document.getElementById('editAffAccNum').value=a.accountNumber||'';
+  document.getElementById('editAffAccName').value=a.accountName||'';
+  document.getElementById('editAffStatus').value=a.status||'active';
+  document.getElementById('editAffPass').value='';
+  showModal('editAffiliateModal');
+}
+async function saveEditAffiliate(){
+  const body={
+    id:document.getElementById('editAffId').value,
+    name:document.getElementById('editAffName').value,
+    phone:document.getElementById('editAffPhone').value,
+    email:document.getElementById('editAffEmail').value,
+    bankName:document.getElementById('editAffBank').value,
+    accountNumber:document.getElementById('editAffAccNum').value,
+    accountName:document.getElementById('editAffAccName').value,
+    status:document.getElementById('editAffStatus').value
+  };
+  const pass=document.getElementById('editAffPass').value;
+  if(pass)body.password=pass;
+  const res=await fetch('/api/affiliate/admin/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await res.json();
+  if(data.success){toast('Affiliate updated');closeModal('editAffiliateModal');loadAffiliates();}
+  else{toast(data.error||'Update failed','error');}
 }
 
 // --- Resend / share affiliate links ---

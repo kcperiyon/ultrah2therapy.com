@@ -373,4 +373,26 @@ router.post('/admin/resend-link', async (req, res) => {
   }
 });
 
+// ADMIN: Update an affiliate's details (password only changed if provided)
+router.post('/admin/update', (req, res) => {
+  const { id, name, phone, email, bankName, accountNumber, accountName, password, status } = req.body;
+  if (!id) return res.json({ error: 'Affiliate id required' });
+
+  const affiliates = readJSON(AFFILIATES_FILE);
+  const aff = affiliates.find(a => a.id === id);
+  if (!aff) return res.json({ error: 'Affiliate not found' });
+
+  if (name !== undefined) aff.name = name;
+  if (phone !== undefined) aff.phone = phone;
+  if (email !== undefined) aff.email = email;
+  if (bankName !== undefined) aff.bankName = bankName;
+  if (accountNumber !== undefined) aff.accountNumber = accountNumber;
+  if (accountName !== undefined) aff.accountName = accountName;
+  if (status !== undefined) aff.status = status;
+  if (password) aff.password = password; // only overwrite when a new one is supplied
+
+  writeJSON(AFFILIATES_FILE, affiliates);
+  res.json({ success: true, affiliate: Object.assign({}, aff, { password: aff.password ? '***' : '' }) });
+});
+
 module.exports = router;
