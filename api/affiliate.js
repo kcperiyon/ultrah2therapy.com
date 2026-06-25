@@ -362,11 +362,7 @@ router.post('/admin/resend-link', async (req, res) => {
   if (!aff.email) return res.json({ error: 'No email on file for this affiliate. Use the WhatsApp button instead.' });
 
   try {
-    await sendMail({
-      to: aff.email,
-      subject: 'Your UltraH2 Affiliate Referral Link',
-      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;"><div style="background:linear-gradient(135deg,#059669,#047857);padding:24px;border-radius:8px;color:#fff;text-align:center;"><h2 style="margin:0;">Your Affiliate Link</h2></div><div style="padding:24px 4px;color:#1e293b;"><p>Hi ${aff.name}, here is your UltraH2 referral link. You earn <strong>N100,000</strong> for every confirmed sale through it.</p><p><strong>Your referral link:</strong><br><a href="${aff.link}">${aff.link}</a></p><p><strong>Direct checkout link:</strong><br><a href="${aff.paymentLink}">${aff.paymentLink}</a></p><p>Track your clicks, referrals and earnings in your <a href="https://ultrah2therapy.com/affiliate-portal">Affiliate Portal</a> (log in with your phone number and password).</p><p style="color:#64748b;font-size:0.85rem;">Share your link on WhatsApp, social media, or in person. Questions? Just reply to this email.</p></div></div>`
-    });
+    await sendMail({ to: aff.email, subject: 'Your UltraH2 Affiliate Referral Link', html: linkEmailHtml(aff) });
     res.json({ success: true, message: 'Link emailed to ' + aff.email });
   } catch (err) {
     res.json({ error: 'Email failed: ' + err.message });
@@ -393,6 +389,39 @@ router.post('/admin/update', (req, res) => {
 
   writeJSON(AFFILIATES_FILE, affiliates);
   res.json({ success: true, affiliate: Object.assign({}, aff, { password: aff.password ? '***' : '' }) });
+});
+
+// Shared template for the affiliate referral-link email
+function linkEmailHtml(aff) {
+  return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;"><div style="background:linear-gradient(135deg,#059669,#047857);padding:24px;border-radius:8px;color:#fff;text-align:center;"><h2 style="margin:0;">Your Affiliate Link</h2></div><div style="padding:24px 4px;color:#1e293b;"><p>Hi ${aff.name}, here is your UltraH2 referral link. You earn <strong>N100,000</strong> for every confirmed sale through it.</p><p><strong>Your referral link:</strong><br><a href="${aff.link}">${aff.link}</a></p><p><strong>Direct checkout link:</strong><br><a href="${aff.paymentLink}">${aff.paymentLink}</a></p><p>Track your clicks, referrals and earnings in your <a href="https://ultrah2therapy.com/affiliate-portal">Affiliate Portal</a> (log in with your phone number and password).</p><p style="color:#64748b;font-size:0.85rem;">Share your link on WhatsApp, social media, or in person. Questions? Just reply to this email.</p></div></div>`;
+}
+
+// ADMIN: send a test email to confirm transactional email is working
+router.post('/admin/email-test', async (req, res) => {
+  try {
+    const info = await sendMail({ subject: 'UltraH2 email test', html: '<p>If you can read this, UltraH2 transactional email is working.</p>' });
+    res.json({ success: true, message: 'Test email sent to ' + (process.env.MAIL_TO || 'support@ultrah2therapy.com'), info: info && info.messageId });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
+
+// ADMIN: resend the referral link to EVERY affiliate that has an email on file
+router.post('/admin/resend-all', async (req, res) => {
+  const affiliates = readJSON(AFFILIATES_FILE);
+  let sent = 0, failed = 0, skipped = 0;
+  const errors = [];
+  for (const aff of affiliates) {
+    if (!aff.email) { skipped++; continue; }
+    try {
+      await sendMail({ to: aff.email, subject: 'Your UltraH2 Affiliate Referral Link', html: linkEmailHtml(aff) });
+      sent++;
+    } catch (err) {
+      failed++;
+      if (errors.length < 3) errors.push(aff.name + ': ' + err.message);
+    }
+  }
+  res.json({ success: true, total: affiliates.length, sent, failed, skipped, errors });
 });
 
 module.exports = router;

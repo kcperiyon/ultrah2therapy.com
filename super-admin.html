@@ -268,6 +268,13 @@ tr:hover{background:#f8fafc}
       <div class="form-group"><label>Hero Subheadline</label><input type="text" id="setHeroSub"></div>
       <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
     </div>
+    <div class="section-card">
+      <h2>Email (Brevo)</h2>
+      <p style="color:#64748b;font-size:0.85rem;margin-bottom:16px">Send a test email to check whether transactional email is active, and resend referral links to every affiliate at once.</p>
+      <button class="btn" onclick="emailTest()">Send Test Email</button>
+      <button class="btn btn-primary" onclick="resendAllLinks()">Resend Links to ALL Affiliates</button>
+      <div id="emailStatus" style="margin-top:16px;font-size:0.9rem"></div>
+    </div>
   </div>
 </div>
 
@@ -463,6 +470,30 @@ async function deleteAffiliate(id){
   if(!confirm('Delete this affiliate?'))return;
   await fetch('/api/affiliate/admin/delete/'+id,{method:'DELETE'});
   toast('Deleted');loadAffiliates();
+}
+
+// --- Email status / bulk resend ---
+function emailStatusEl(){return document.getElementById('emailStatus');}
+async function emailTest(){
+  const el=emailStatusEl();el.style.color='#64748b';el.textContent='Sending test email...';
+  try{
+    const res=await fetch('/api/affiliate/admin/email-test',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const d=await res.json();
+    if(d.success){el.style.color='#059669';el.textContent='✓ '+(d.message||'Test email sent. Check the inbox.');}
+    else{el.style.color='#ef4444';el.textContent='✗ Not working yet: '+(d.error||'unknown error');}
+  }catch(e){el.style.color='#ef4444';el.textContent='✗ Request failed';}
+}
+async function resendAllLinks(){
+  if(!confirm('Email their referral link to every affiliate that has an email on file?'))return;
+  const el=emailStatusEl();el.style.color='#64748b';el.textContent='Sending to all affiliates...';
+  try{
+    const res=await fetch('/api/affiliate/admin/resend-all',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const d=await res.json();
+    if(d.success){
+      el.style.color=d.failed?'#b45309':'#059669';
+      el.innerHTML='Sent: <strong>'+d.sent+'</strong> &nbsp; Failed: <strong>'+d.failed+'</strong> &nbsp; Skipped (no email): <strong>'+d.skipped+'</strong> of '+d.total+(d.errors&&d.errors.length?'<br><small style="color:#ef4444">'+d.errors.join('<br>')+'</small>':'');
+    } else {el.style.color='#ef4444';el.textContent='✗ '+(d.error||'Failed');}
+  }catch(e){el.style.color='#ef4444';el.textContent='✗ Request failed';}
 }
 
 // --- Site & product settings ---
