@@ -42,7 +42,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:linear-gradient(135
 <img src="/assets/product.png" alt="UltraH2">
 <div class="product-info">
 <h3>UltraH2 Molecular Hydrogen Generator</h3>
-<div class="price">₦1,300,000</div>
+<div class="price" id="coPrice">₦1,300,000</div>
 </div>
 </div>
 
@@ -66,11 +66,21 @@ body{font-family:'Inter',-apple-system,sans-serif;background:linear-gradient(135
 
 <script>
 let affiliateCode = null;
+let CHECKOUT = { price: 1300000, paystackLink: 'https://paystack.shop/pay/ultrah2' };
 
 window.onload = function() {
+  // Pull live price + checkout link from settings
+  fetch('/api/settings').then(r => r.json()).then(s => {
+    if (s.price) CHECKOUT.price = Number(s.price);
+    if (s.paystackLink) CHECKOUT.paystackLink = s.paystackLink;
+    const fmt = '₦' + CHECKOUT.price.toLocaleString();
+    const pe = document.getElementById('coPrice'); if (pe) pe.textContent = fmt;
+    const pb = document.getElementById('payBtn'); if (pb) pb.textContent = '💳 Proceed to Payment — ' + fmt;
+  }).catch(() => {});
+
   const params = new URLSearchParams(window.location.search);
   const ref = params.get('ref') || localStorage.getItem('ultrah2_ref');
-  
+
   if (ref) {
     affiliateCode = ref;
     // Verify affiliate
@@ -116,14 +126,14 @@ async function proceedToPayment() {
           customerName: name,
           customerPhone: phone,
           customerEmail: email,
-          amount: 1300000
+          amount: CHECKOUT.price
         })
       });
     }
   } catch(e) {}
 
   // Redirect to Paystack
-  window.location.href = 'https://paystack.shop/pay/ultrah2';
+  window.location.href = CHECKOUT.paystackLink;
 }
 </script>
 </body>

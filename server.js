@@ -38,6 +38,7 @@ app.use('/api/ada', require('./api/ada'));
 app.use('/api/ada/training', require('./api/training'));
 app.use('/api/affiliate', require('./api/affiliate'));
 app.use('/api/contact', require('./api/contact'));
+app.use('/api/settings', require('./api/settings'));
 
 // Super Admin
 app.get('/super-admin', (req, res) => res.sendFile(path.join(__dirname, 'super-admin.html')));

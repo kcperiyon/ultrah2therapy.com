@@ -89,6 +89,7 @@ tr:hover{background:#f8fafc}
     <button class="tab" onclick="switchTab('training')">Train Ada</button>
     <button class="tab" onclick="switchTab('config')">AI Config</button>
     <button class="tab" onclick="switchTab('chats')">Chats</button>
+    <button class="tab" onclick="switchTab('settings')">Settings</button>
   </div>
 
   <!-- DASHBOARD -->
@@ -247,6 +248,27 @@ tr:hover{background:#f8fafc}
       <div id="chatLogs"></div>
     </div>
   </div>
+
+  <div class="tab-content" id="tab-settings">
+    <div class="section-card">
+      <h2>Site &amp; Product Settings</h2>
+      <p style="color:#64748b;font-size:0.85rem;margin-bottom:20px">These control the live website: the price and checkout link buyers see, your support contact, and the footer social links. Changes apply immediately.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+        <div class="form-group"><label>Product Name</label><input type="text" id="setProductName"></div>
+        <div class="form-group"><label>Price (NGN)</label><input type="number" id="setPrice"></div>
+        <div class="form-group"><label>Paystack Checkout Link</label><input type="text" id="setPaystack"></div>
+        <div class="form-group"><label>Support Email</label><input type="text" id="setSupportEmail"></div>
+        <div class="form-group"><label>WhatsApp Number <small style="color:#64748b">(intl, e.g. 2348...)</small></label><input type="text" id="setWhatsapp"></div>
+        <div class="form-group"><label>Instagram URL</label><input type="text" id="setInstagram"></div>
+        <div class="form-group"><label>YouTube URL</label><input type="text" id="setYoutube"></div>
+        <div class="form-group"><label>TikTok URL</label><input type="text" id="setTiktok"></div>
+        <div class="form-group"><label>Facebook URL</label><input type="text" id="setFacebook"></div>
+      </div>
+      <div class="form-group"><label>Hero Headline <small style="color:#64748b">(blank = keep site default)</small></label><input type="text" id="setHeroHeadline"></div>
+      <div class="form-group"><label>Hero Subheadline</label><input type="text" id="setHeroSub"></div>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
 </div>
 
 <!-- ADD AFFILIATE MODAL -->
@@ -358,6 +380,7 @@ function switchTab(name){
   if(name==='training')loadTraining();
   if(name==='config')loadConfig();
   if(name==='chats')loadChats();
+  if(name==='settings')loadSettings();
 }
 
 function toast(msg,type='success'){
@@ -440,6 +463,31 @@ async function deleteAffiliate(id){
   if(!confirm('Delete this affiliate?'))return;
   await fetch('/api/affiliate/admin/delete/'+id,{method:'DELETE'});
   toast('Deleted');loadAffiliates();
+}
+
+// --- Site & product settings ---
+async function loadSettings(){
+  const res=await fetch('/api/settings');
+  const s=await res.json();
+  const v=(id,val)=>{const el=document.getElementById(id);if(el)el.value=(val!==undefined&&val!==null)?val:'';};
+  v('setProductName',s.productName);v('setPrice',s.price);v('setPaystack',s.paystackLink);
+  v('setSupportEmail',s.supportEmail);v('setWhatsapp',s.whatsapp);
+  v('setInstagram',s.social&&s.social.instagram);v('setYoutube',s.social&&s.social.youtube);
+  v('setTiktok',s.social&&s.social.tiktok);v('setFacebook',s.social&&s.social.facebook);
+  v('setHeroHeadline',s.hero&&s.hero.headline);v('setHeroSub',s.hero&&s.hero.subheadline);
+}
+async function saveSettings(){
+  const g=id=>{const el=document.getElementById(id);return el?el.value:'';};
+  const body={
+    productName:g('setProductName'),price:Number(g('setPrice'))||undefined,paystackLink:g('setPaystack'),
+    supportEmail:g('setSupportEmail'),whatsapp:g('setWhatsapp'),
+    social:{instagram:g('setInstagram'),youtube:g('setYoutube'),tiktok:g('setTiktok'),facebook:g('setFacebook')},
+    hero:{headline:g('setHeroHeadline'),subheadline:g('setHeroSub')}
+  };
+  const res=await fetch('/api/settings/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await res.json();
+  if(data.success)toast('Settings saved — live on the site now');
+  else toast(data.error||'Save failed','error');
 }
 
 // --- Edit affiliate ---

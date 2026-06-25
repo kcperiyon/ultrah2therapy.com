@@ -16,3 +16,4 @@ leads.json
 # logs / os
 *.log
 .DS_Store
+settings.json
