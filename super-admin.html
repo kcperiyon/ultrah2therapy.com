@@ -356,7 +356,10 @@ async function loadAffiliates(){
     <td>${formatMoney(a.totalPaid)}</td>
     <td>${formatMoney(a.pendingPayout)}</td>
     <td><span class="badge badge-${a.status}">${a.status}</span></td>
-    <td>
+    <td style="white-space:nowrap">
+      <button class="btn" onclick="waAffiliate('${a.id}')" title="Send their link via WhatsApp">WhatsApp</button>
+      <button class="btn" onclick="copyAffLink('${a.id}')" title="Copy referral link">Copy Link</button>
+      <button class="btn" onclick="resendEmail('${a.code}')" title="Email their link (needs Brevo active)">Email</button>
       <button class="btn btn-danger" onclick="deleteAffiliate('${a.id}')">Delete</button>
     </td>
   </tr>`).join('');
@@ -383,6 +386,36 @@ async function deleteAffiliate(id){
   if(!confirm('Delete this affiliate?'))return;
   await fetch('/api/affiliate/admin/delete/'+id,{method:'DELETE'});
   toast('Deleted');loadAffiliates();
+}
+
+// --- Resend / share affiliate links ---
+function normPhone(p){
+  let d=(p||'').replace(/[^0-9]/g,'');
+  if(d.startsWith('234'))return d;
+  if(d.startsWith('0'))return '234'+d.slice(1);
+  if(d.length===10)return '234'+d;
+  return d;
+}
+function affById(id){return allAffiliates.find(a=>a.id===id);}
+function waAffiliate(id){
+  const a=affById(id);if(!a){toast('Affiliate not found','error');return;}
+  const msg=`Hi ${a.name}! Here is your UltraH2 affiliate referral link:\n${a.link}\n\nShare it and earn ₦100,000 for every confirmed sale.\nDirect checkout link: ${a.paymentLink}\nTrack your earnings anytime in your portal: https://ultrah2therapy.com/affiliate-portal`;
+  window.open('https://wa.me/'+normPhone(a.phone)+'?text='+encodeURIComponent(msg),'_blank');
+}
+function copyAffLink(id){
+  const a=affById(id);if(!a){toast('Affiliate not found','error');return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(a.link).then(()=>toast('Copied: '+a.link)).catch(()=>prompt('Copy this link:',a.link));
+  } else { prompt('Copy this link:',a.link); }
+}
+async function resendEmail(code){
+  toast('Sending email...');
+  try{
+    const res=await fetch('/api/affiliate/admin/resend-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+    const data=await res.json();
+    if(data.success)toast(data.message||'Email sent');
+    else toast(data.error||'Failed','error');
+  }catch(e){toast('Request failed','error');}
 }
 
 // RECORD SALE

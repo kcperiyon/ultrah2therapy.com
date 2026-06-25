@@ -351,4 +351,26 @@ router.get('/admin/export', (req, res) => {
   res.send(header + rows);
 });
 
+// ADMIN: Resend the affiliate's referral link by email
+router.post('/admin/resend-link', async (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.json({ error: 'Affiliate code required' });
+
+  const affiliates = readJSON(AFFILIATES_FILE);
+  const aff = affiliates.find(a => a.code === code);
+  if (!aff) return res.json({ error: 'Affiliate not found' });
+  if (!aff.email) return res.json({ error: 'No email on file for this affiliate. Use the WhatsApp button instead.' });
+
+  try {
+    await sendMail({
+      to: aff.email,
+      subject: 'Your UltraH2 Affiliate Referral Link',
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;"><div style="background:linear-gradient(135deg,#059669,#047857);padding:24px;border-radius:8px;color:#fff;text-align:center;"><h2 style="margin:0;">Your Affiliate Link</h2></div><div style="padding:24px 4px;color:#1e293b;"><p>Hi ${aff.name}, here is your UltraH2 referral link. You earn <strong>N100,000</strong> for every confirmed sale through it.</p><p><strong>Your referral link:</strong><br><a href="${aff.link}">${aff.link}</a></p><p><strong>Direct checkout link:</strong><br><a href="${aff.paymentLink}">${aff.paymentLink}</a></p><p>Track your clicks, referrals and earnings in your <a href="https://ultrah2therapy.com/affiliate-portal">Affiliate Portal</a> (log in with your phone number and password).</p><p style="color:#64748b;font-size:0.85rem;">Share your link on WhatsApp, social media, or in person. Questions? Just reply to this email.</p></div></div>`
+    });
+    res.json({ success: true, message: 'Link emailed to ' + aff.email });
+  } catch (err) {
+    res.json({ error: 'Email failed: ' + err.message });
+  }
+});
+
 module.exports = router;
